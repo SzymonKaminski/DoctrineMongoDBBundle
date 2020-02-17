@@ -13,8 +13,8 @@ We begin this tutorial with the model for a ``User`` document:
 
 .. code-block:: php
 
-    // src/Acme/AccountBundle/Document/User.php
-    namespace Acme\AccountBundle\Document;
+    // src/Document/User.php
+    namespace App\Document;
 
     use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
     use Symfony\Component\Validator\Constraints as Assert;
@@ -87,8 +87,8 @@ Next, create the form for the ``User`` model:
 
 .. code-block:: php
 
-    // src/Acme/AccountBundle/Form/Type/UserType.php
-    namespace Acme\AccountBundle\Form\Type;
+    // src/Form/Type/UserType.php
+    namespace App\Form\Type;
 
     use Symfony\Component\Form\AbstractType;
     use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -96,7 +96,6 @@ Next, create the form for the ``User`` model:
     use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
     use Symfony\Component\Form\FormBuilderInterface;
     use Symfony\Component\OptionsResolver\OptionsResolver;
-    use Acme\AccountBundle\Document\User;
 
     class UserType extends AbstractType
     {
@@ -139,17 +138,15 @@ form and adds the extra field needed:
 
 .. code-block:: php
 
-    // src/Acme/AccountBundle/Form/Model/Registration.php
-    namespace Acme\AccountBundle\Form\Model;
+    // src/Form/Model/Registration.php
+    namespace App\Form\Model;
 
     use Symfony\Component\Validator\Constraints as Assert;
-
-    use Acme\AccountBundle\Document\User;
 
     class Registration
     {
         /**
-         * @Assert\Type(type="Acme\AccountBundle\Document\User")
+         * @Assert\Type(type="App\Document\User")
          */
         protected $user;
 
@@ -184,8 +181,8 @@ Next, create the form for this ``Registration`` model:
 
 .. code-block:: php
 
-    // src/Acme/AccountBundle/Form/Type/RegistrationType.php
-    namespace Acme\AccountBundle\Form\Type;
+    // src/Form/Type/RegistrationType.php
+    namespace App\Form\Type;
 
     use Symfony\Component\Form\AbstractType;
     use Symfony\Component\Form\Extension\Core\Type\CheckboxType
@@ -213,24 +210,21 @@ controller that will display the registration form:
 
 .. code-block:: php
 
-    // src/Acme/AccountBundle/Controller/AccountController.php
-    namespace Acme\AccountBundle\Controller;
+    // src/Controller/AccountController.php
+    namespace App\Controller;
 
     use Doctrine\ODM\MongoDB\DocumentManager;
 
     use Symfony\Bundle\FrameworkBundle\Controller\Controller;
     use Symfony\Component\HttpFoundation\Response;
 
-    use Acme\AccountBundle\Form\Type\RegistrationType;
-    use Acme\AccountBundle\Form\Model\Registration;
-
-    class AccountController extends Controller
+    class AccountController extends AbstractController
     {
         public function registerAction()
         {
             $form = $this->createForm(RegistrationType::class, new Registration());
 
-            return $this->render('AcmeAccountBundle:Account:register.html.twig', [
+            return $this->render('Account/register.html.twig', [
                 'form' => $form->createView()
             ]);
         }
@@ -240,8 +234,8 @@ and its template:
 
 .. code-block:: html+jinja
 
-    {# src/Acme/AccountBundle/Resources/views/Account/register.html.twig #}
-    
+    {# templates/Account/register.html.twig #}
+
     {{ form_start(form, {'action': path('create'), 'method': 'POST'}) }}
         {{ form_widget(form) }}
 
@@ -253,6 +247,7 @@ the form submission - perform its validation and save the User into MongoDB:
 
 .. code-block:: php
 
+    // src/Controller/AccountController.php
     public function createAction(DocumentManager $dm, Request $request)
     {
         $form = $this->createForm(RegistrationType::class, new Registration());
@@ -268,7 +263,7 @@ the form submission - perform its validation and save the User into MongoDB:
             return $this->redirect(...);
         }
 
-        return $this->render('AcmeAccountBundle:Account:register.html.twig', [
+        return $this->render('Account/register.html.twig', [
             'form' => $form->createView()
         ]);
     }
